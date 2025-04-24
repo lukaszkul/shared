@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>interchat</title>
+  <title>SoulChat v1.0</title>
 </head>
 <body>
-  <p id="status">Loading...</p>
+  <p id="status">Sending message...</p>
   <pre id="output"></pre>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const s1 = params.get("i");
-    const s2 = params.get("says");
+    const s2 = params.get("say");
     const s3 = params.get("to");
     
     const status = document.getElementById('status');
@@ -31,15 +31,14 @@
         data.append("s3", s3);
       }
 
-      fetch("http://lightandmagic.unaux.com/chat/receiver.php", {
+      fetch("receiver.php", {
         method: "POST",      
         body: data
       })
       .then(response => response.text())
       .then(html => {
-        status.innerText = "Ready.";
+        status.innerText = "Message sent!";
         output.innerHTML = html;
-      })
       .catch(error => {
         status.innerText = "Error contacting the server.";
         output.innerText = error;
