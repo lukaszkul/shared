@@ -1,54 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Relaying...</title>
+  <title>interchat</title>
 </head>
 <body>
-  <p id="status">Working on it...</p>
+  <p id="status">Loading...</p>
+  <pre id="output"></pre>
 
   <script>
-    function getQueryParams() {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        s1: params.get('I'),
-        s2: params.get('says'),
-        s3: params.get('to')
-      };
-    }
+    const query = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+    const status = document.getElementById('status');
+    const output = document.getElementById('output');
 
-    function postToPHP(params) {
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = "https://yourdestinationdomain.com/receiver.php";
-
-      ['s1', 's2', 's3'].forEach(key => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = params[key];
-        form.appendChild(input);
-      });
-
-      document.body.appendChild(form);
-      form.submit();
-    }
-
-    const query = getQueryParams();
-
-    if (!query.s1) {
-      document.getElementById("status").textContent = "Missing required parameter: s1";
-    } else if ((query.s2 && !query.s3) || (!query.s2 && query.s3)) {
-      document.getElementById("status").textContent = "s2 and s3 must be provided together.";
+    // Validation
+    if (!query.i) {
+      status.innerText = "Missing required parameter: I";
+    } else if ((query.says && !query.to) || (!query.says && query.to)) {
+      status.innerText = "Both s2 and s3 must be present together.";
     } else {
+      // Prepare POST payload
+      const data = new FormData();
+      data.append("who", query.i);
       if (query.s2 && query.s3) {
-        postToPHP(query);
+        data.append("what", query.says);
+        data.append("towhom", query.to);
       }
 
-      setTimeout(() => {
-        const redirectURL = `https://yourdomain.com/${query.s1}.txt`;
-        window.location.href = redirectURL;
-      }, 3333);
+      fetch("http://lightandmagic.unaux.com/chat/receiver.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },        
+        body: data
+      })
+      .then(response => response.text())
+      .then(html => {
+        status.innerText = "Ready.";
+        output.innerText = html;
+      })
+      .catch(error => {
+        status.innerText = "Error contacting the server.";
+        output.innerText = error;
+      });
     }
   </script>
 </body>
