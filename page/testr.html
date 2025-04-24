@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>interchat</title>
+</head>
+<body>
+  <p id="status">Loading...</p>
+  <pre id="output"></pre>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const s1 = params.get("i");
+    const s2 = params.get("says");
+    const s3 = params.get("to");
+    
+    const status = document.getElementById('status');
+    const output = document.getElementById('output');
+
+    // Validation
+    if (!s1) {
+      status.innerText = "Missing required parameter: I";
+    } else if ((s2 && !s3) || (!s2 && s3)) {
+      status.innerText = "Both says and to must be present together.";
+    } else {
+      // Prepare POST payload
+      const data = new URLSearchParams();
+      data.append("s1", s1);
+      if (s2 && s3) {
+        data.append("s2", s2);
+        data.append("s3", s3);
+      }
+
+      fetch("http://lightandmagic.unaux.com/chat/receiver.php", {
+        method: "POST",      
+        body: data
+      })
+      .then(response => response.text())
+      .then(html => {
+        status.innerText = "Ready.";
+        output.innerHTML = html;
+      })
+      .catch(error => {
+        status.innerText = "Error contacting the server.";
+        output.innerText = error;
+      });
+    }
+  </script>
+</body>
+</html>
