@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Relaying...</title>
+</head>
+<body>
+  <p id="status">Working on it...</p>
+
+  <script>
+    function getQueryParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        s1: params.get('I'),
+        s2: params.get('says'),
+        s3: params.get('to')
+      };
+    }
+
+    function postToPHP(params) {
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = "https://yourdestinationdomain.com/receiver.php";
+
+      ['s1', 's2', 's3'].forEach(key => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = params[key];
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    const query = getQueryParams();
+
+    if (!query.s1) {
+      document.getElementById("status").textContent = "Missing required parameter: s1";
+    } else if ((query.s2 && !query.s3) || (!query.s2 && query.s3)) {
+      document.getElementById("status").textContent = "s2 and s3 must be provided together.";
+    } else {
+      if (query.s2 && query.s3) {
+        postToPHP(query);
+      }
+
+      setTimeout(() => {
+        const redirectURL = `https://yourdomain.com/${query.s1}.txt`;
+        window.location.href = redirectURL;
+      }, 3333);
+    }
+  </script>
+</body>
+</html>
